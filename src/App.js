@@ -1,11 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Image, Table, message } from 'antd';
 import axios from 'axios'
 
 function App() {
   const [list,setList]=useState();
+  const [loading,setLoading]=useState(true);
   const columns = [
     {
       title: 'Mã số',
@@ -43,7 +44,7 @@ function App() {
     {
       title: 'Hình Ảnh',
       render: ( record) => (
-        <><img src={record.hinhAnh}  height={"200px"}></img></>
+        <><Image src={record.hinhAnh}  height={"200px"}/></>
       ),
       key: 'image',
     },
@@ -89,6 +90,8 @@ function App() {
     },
   ]
   const getData=async()=>{
+    try{
+      setLoading(true)
       const req= await axios.post('https://thianh.cpc.vn/api/v1/dynamic',{
         "dataQuery": "spDauGiaTranh",
         "parameters": {
@@ -102,15 +105,19 @@ function App() {
           }
         })
         setList(req?.data.results)
-        console.log(req?.data);
+        setLoading(false);
+      }
+      catch{
+        setLoading(false);
+        message.error('Lỗi kết nối!')
+      }
   }
   useEffect(() => {
     getData();
-    
   }, []);
   return (
     <div className="App">
-    <Table columns={columns} dataSource={list} />
+    <Table columns={columns} dataSource={list} loading={loading} />
     </div>
   );
 }
